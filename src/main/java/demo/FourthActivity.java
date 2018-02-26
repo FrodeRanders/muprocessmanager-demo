@@ -15,17 +15,18 @@
  * limitations under the License.
  *
  */
-package test;
+package demo;
 
 import org.gautelis.muprocessmanager.MuActivity;
 import org.gautelis.muprocessmanager.MuActivityParameters;
 
-public class ThirdActivity implements MuActivity {
+public class FourthActivity implements MuActivity {
 
-    private static final double forwardFailureProbability = 0.10;
+    private static final double forwardFailureProbability = 0.25;
+    private static final double backwardExceptionProbability = 0.001;
     private static final double backwardFailureProbability = 0.01;
 
-    public ThirdActivity() {}
+    public FourthActivity() {}
 
     @Override
     public boolean forward(MuActivityParameters args) {
@@ -34,6 +35,11 @@ public class ThirdActivity implements MuActivity {
 
     @Override
     public boolean backward(MuActivityParameters args) {
+        // A possibility for an exception
+        if (Math.random() < backwardExceptionProbability) {
+            throw new NullPointerException("just an example of a nasty failure"); // utter failure
+        }
+
         return !(Math.random() < backwardFailureProbability);
     }
 }

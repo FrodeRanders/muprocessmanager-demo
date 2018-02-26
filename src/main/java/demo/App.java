@@ -1,10 +1,10 @@
-package test;
+package demo;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.gautelis.muprocessmanager.*;
-import org.gautelis.muprocessmanager.queue.WorkQueue;
-import org.gautelis.muprocessmanager.queue.WorkerQueueFactory;
+import org.gautelis.vopn.queue.WorkQueue;
+import org.gautelis.vopn.queue.WorkerQueueFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class App 
 {
-    private static final Logger log = LogManager.getLogger(App.class);
+    private static final Logger log = LoggerFactory.getLogger(App.class);
 
     public static void main( String... args )
     {
@@ -67,15 +67,13 @@ public class App
                     } catch (MuProcessBackwardBehaviourException mpbae) {
                         // Forward activity failed and so did some compensation activities
                         String info = "Process and compensation failure: " + mpbae.getMessage();
-                        if (log.isTraceEnabled()) {
-                            log.trace(info);
-                        }
+                        log.trace(info);
+
                     } catch (MuProcessForwardBehaviourException mpfae) {
                         // Forward activity failed, but compensations were successful
                         String info = "No success, but managed to compensate: " + mpfae.getMessage();
-                        if (log.isTraceEnabled()) {
-                            log.trace(info);
-                        }
+                        log.trace(info);
+
                     } catch (Throwable t) {
                         // Other reasons for failure not necessarily related to the activity
                         if (null != process) {
