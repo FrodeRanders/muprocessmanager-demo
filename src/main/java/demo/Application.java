@@ -10,9 +10,9 @@ import java.util.*;
 
 /**
  */
-public class App 
+public class Application
 {
-    private static final Logger log = LoggerFactory.getLogger(App.class);
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     public static void main( String... args )
     {
@@ -42,7 +42,7 @@ public class App
                     try {
                         process = mngr.newProcess(correlationId);
 
-                        MuProcessResult result = new MuProcessResult("This is a result");
+                        MuProcessResult result = new MuProcessResult();
 
                         MuActivityParameters parameters = new MuActivityParameters();
                         parameters.put("arg1", "param1");
