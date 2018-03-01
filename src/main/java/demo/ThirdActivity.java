@@ -19,6 +19,7 @@ package demo;
 
 import org.gautelis.muprocessmanager.MuActivity;
 import org.gautelis.muprocessmanager.MuActivityParameters;
+import org.gautelis.muprocessmanager.MuProcessResult;
 
 public class ThirdActivity implements MuActivity {
 
@@ -28,7 +29,7 @@ public class ThirdActivity implements MuActivity {
     public ThirdActivity() {}
 
     @Override
-    public boolean forward(MuActivityParameters args) {
+    public boolean forward(MuActivityParameters args, MuProcessResult result) {
         return !(Math.random() < forwardFailureProbability);
     }
 

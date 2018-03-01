@@ -42,15 +42,13 @@ public class Application
                     try {
                         process = mngr.newProcess(correlationId);
 
-                        MuProcessResult result = new MuProcessResult();
-
                         MuActivityParameters parameters = new MuActivityParameters();
                         parameters.put("arg1", "param1");
                         process.execute(new FirstActivity(), parameters);
 
                         parameters.put("arg2", 42);
                         process.execute(
-                                (p) -> result.add(10 * (int) p.get("arg2")),
+                                (p, r) -> r.add(10 * (int) p.get("arg2")),
                                 new SecondActivityCompensation(),
                                 parameters
                         );
@@ -61,8 +59,10 @@ public class Application
                         parameters.put("arg4", 22 / 7.0);
                         process.execute(new FourthActivity(), parameters);
 
-                        result.add("This is another part of the result");
-                        process.finished(result);
+                        MuProcessResult result = process.getResult();
+                        result.add("Adding to the process result");
+
+                        process.finished();
 
                     } catch (MuProcessBackwardBehaviourException mpbae) {
                         // Forward activity failed and so did some compensation activities
