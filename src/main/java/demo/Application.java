@@ -80,7 +80,18 @@ public class Application
                         log.trace(info);
 
                     } catch (Throwable t) {
-                        // Other reasons for failure not necessarily related to the activity
+                        // Other reasons for failure not necessarily related to the activity.
+                        //
+                        // One nice, but not at all representative, example occurred during a prolonged debugging
+                        // session (I went for a walk :) where the process management background activity
+                        // correctly recovered the assumed stuck process underneath our feet:
+                        //
+                        //    org.gautelis.muprocessmanager.MuProcessException: Failed to persist process step:
+                        //        DerbySQLIntegrityConstraintViolationException [
+                        //          INSERT on table 'MU_PROCESS_STEP' caused a violation of foreign key constraint 'MU_P_S_PROCESS_EX' for key (4975097).
+                        //          The statement has been rolled back.
+                        //        ], SQLstate(23503), Vendor code(20000)
+                        //
                         if (null != process) {
                             process.failed();
                         }
