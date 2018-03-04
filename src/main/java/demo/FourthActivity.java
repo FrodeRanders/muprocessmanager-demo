@@ -20,7 +20,7 @@ package demo;
 import org.gautelis.muprocessmanager.MuActivity;
 import org.gautelis.muprocessmanager.MuActivityParameters;
 import org.gautelis.muprocessmanager.MuProcessResult;
-import org.gautelis.muprocessmanager.MuProcessState;
+import org.gautelis.muprocessmanager.MuActivityState;
 
 import java.util.Optional;
 
@@ -38,7 +38,7 @@ public class FourthActivity implements MuActivity {
     }
 
     @Override
-    public boolean backward(MuActivityParameters args, Optional<MuProcessState> preState) {
+    public boolean backward(MuActivityParameters args, Optional<MuActivityState> preState) {
         // A possibility for an exception
         if (Math.random() < backwardExceptionProbability) {
             throw new NullPointerException("just an example of a nasty failure"); // utter failure

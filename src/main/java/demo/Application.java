@@ -103,7 +103,7 @@ public class Application
             }
 
             do {
-                System.out.println("\nProcess result samples:");
+                System.out.println("\nProcess result samples: currently " + sampledCorrelationIds.size() + " samples");
                 try {
                     // Iterate since we will modify collection
                     Iterator<String> sit = sampledCorrelationIds.iterator();
@@ -117,7 +117,7 @@ public class Application
                             continue;
                         }
 
-                        System.out.print("correlationId=" + correlationId);
+                        System.out.print("correlationId=\"" + correlationId + "\"");
                         Optional<MuProcessStatus> _status = mngr.getProcessStatus(correlationId);
                         if (_status.isPresent()) {
                             MuProcessStatus status = _status.get();
@@ -178,7 +178,14 @@ public class Application
         catch (MuProcessException mpe) {
             String info = "Process manager failure: ";
             info += mpe;
+            System.out.println(info);
             log.warn(info);
+        }
+        catch (Throwable t) {
+            String info = "Failure: ";
+            info += t;
+            System.out.println(info);
+            log.warn(info, t);
         }
     }
 }
