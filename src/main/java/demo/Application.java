@@ -26,16 +26,18 @@ public class Application
             );
             workQueue.start();
 
-            final Collection<String> sampledCorrelationIds = new LinkedList<>();
+            final Collection<String> sampledCorrelationIds = new ArrayList<>();
 
-            for (int i = 0; i < 100000; i++) {
+            for (int i = 0; i < 1000000; i++) {
                 final int[] j = {i};
 
                 workQueue.execute(() -> {
                     String correlationId = UUID.randomUUID().toString();
                     if (j[0] % 1000 == 0) {
                         // Sample each thousandth correlation ID
-                        sampledCorrelationIds.add(correlationId);
+                        synchronized (sampledCorrelationIds) {
+                            sampledCorrelationIds.add(correlationId);
+                        }
                     }
 
                     MuProcess process = null;
@@ -44,7 +46,10 @@ public class Application
 
                         MuActivityParameters parameters = new MuActivityParameters();
                         parameters.put("arg1", "param1");
-                        process.execute(new FirstActivity(), parameters);
+                        process.execute(
+                                (p, r) -> !(Math.random() < /* forward failure probability */ 0.01),
+                                parameters
+                        );
 
                         parameters.put("arg2", 42);
                         process.execute(
@@ -92,7 +97,14 @@ public class Application
                     // Iterate since we will modify collection
                     Iterator<String> sit = sampledCorrelationIds.iterator();
                     while (sit.hasNext()) {
-                        String correlationId = sit.next();
+                        String correlationId;
+                        try {
+                            correlationId = sit.next();
+                        }
+                        catch (ConcurrentModificationException ignore) {
+                            // Don't care since this is just for visualization
+                            continue;
+                        }
 
                         System.out.print("correlationId=" + correlationId);
                         Optional<MuProcessStatus> _status = mngr.getProcessStatus(correlationId);
@@ -104,7 +116,13 @@ public class Application
                                 case SUCCESSFUL:
                                     Optional<MuProcessResult> _result = mngr.getProcessResult(correlationId);
                                     _result.ifPresent(objects -> objects.forEach((v) -> System.out.print(" {" + v + "}")));
-                                    sit.remove();
+
+                                    try {
+                                        sit.remove();
+                                    }
+                                    catch (ConcurrentModificationException ignore) {
+                                        // Don't care since this is just for visualization
+                                    }
                                     break;
 
                                 case NEW:
@@ -113,8 +131,16 @@ public class Application
                                     break;
 
                                 default:
-                                    // No idea to recheck
-                                    sit.remove();
+                                    // We will try to reset the process here -- faking a retry
+                                    Optional<Boolean> isReset = mngr.resetProcess(correlationId);
+                                    isReset.ifPresent(aBoolean -> System.out.print(" (was " + (aBoolean ? "" : "NOT ") + "reset)"));
+
+                                    try {
+                                        sit.remove();
+                                    }
+                                    catch (ConcurrentModificationException ignore) {
+                                        // Don't care since this is just for visualization
+                                    }
                                     break;
                             }
                         }
