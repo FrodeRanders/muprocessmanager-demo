@@ -14,6 +14,8 @@ public class Application
 {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
+    private static final Object lock = new Object();
+
     public static void main( String... args )
     {
         try {
@@ -29,17 +31,15 @@ public class Application
             final Collection<String> sampledCorrelationIds = new ArrayList<>();
 
             for (int i = 0; i < 1000000; i++) {
-                final int[] j = {i};
+                final String correlationId = UUID.randomUUID().toString();
+                if (i % 1000 == 0) {
+                    // Sample each thousandth correlation ID
+                    synchronized (lock) {
+                        sampledCorrelationIds.add(correlationId);
+                    }
+                }
 
                 workQueue.execute(() -> {
-                    String correlationId = UUID.randomUUID().toString();
-                    if (j[0] % 1000 == 0) {
-                        // Sample each thousandth correlation ID
-                        synchronized (sampledCorrelationIds) {
-                            sampledCorrelationIds.add(correlationId);
-                        }
-                    }
-
                     MuProcess process = null;
                     try {
                         process = mngr.newProcess(correlationId);
@@ -103,64 +103,49 @@ public class Application
             }
 
             do {
-                System.out.println("\nProcess result samples: currently " + sampledCorrelationIds.size() + " samples");
+                System.out.println("\nProcess result samples: ");
                 try {
-                    // Iterate since we will modify collection
-                    Iterator<String> sit = sampledCorrelationIds.iterator();
-                    while (sit.hasNext()) {
-                        String correlationId;
-                        try {
-                            correlationId = sit.next();
-                        }
-                        catch (ConcurrentModificationException ignore) {
-                            // Don't care since this is just for visualization
-                            continue;
-                        }
+                    synchronized (lock) {
+                        // Iterate since we will modify collection
+                        Iterator<String> sit = sampledCorrelationIds.iterator();
+                        while (sit.hasNext()) {
+                            String correlationId  = sit.next();
 
-                        System.out.print("correlationId=\"" + correlationId + "\"");
-                        Optional<MuProcessStatus> _status = mngr.getProcessStatus(correlationId);
-                        if (_status.isPresent()) {
-                            MuProcessStatus status = _status.get();
-                            System.out.print(" status=" + status);
+                            final StringBuffer info = new StringBuffer("correlationId=\"").append(correlationId).append("\"");
 
-                            switch (status) {
-                                case SUCCESSFUL:
-                                    Optional<MuProcessResult> _result = mngr.getProcessResult(correlationId);
-                                    _result.ifPresent(objects -> objects.forEach((v) -> System.out.print(" {" + v + "}")));
+                            Optional<MuProcessStatus> _status = mngr.getProcessStatus(correlationId);
+                            if (_status.isPresent()) {
+                                MuProcessStatus status = _status.get();
+                                info.append(" status=").append(status);
 
-                                    try {
+                                switch (status) {
+                                    case SUCCESSFUL:
                                         sit.remove();
-                                    }
-                                    catch (ConcurrentModificationException ignore) {
-                                        // Don't care since this is just for visualization
-                                    }
-                                    break;
 
-                                case NEW:
-                                case PROGRESSING:
-                                    // Check later
-                                    break;
+                                        // Retrieve process result
+                                        Optional<MuProcessResult> _result = mngr.getProcessResult(correlationId);
+                                        _result.ifPresent(objects -> objects.forEach((v) -> info.append(" {").append(v).append("}")));
+                                        break;
 
-                                default:
-                                    // We will try to reset the process here -- faking a retry
-                                    Optional<Boolean> isReset = mngr.resetProcess(correlationId);
-                                    isReset.ifPresent(aBoolean -> System.out.print(" (was " + (aBoolean ? "" : "NOT ") + "reset)"));
+                                    case NEW:
+                                    case PROGRESSING:
+                                        // Check later
+                                        break;
 
-                                    try {
+                                    case COMPENSATED:
+                                    case COMPENSATION_FAILED:
+                                    default:
                                         sit.remove();
-                                    }
-                                    catch (ConcurrentModificationException ignore) {
-                                        // Don't care since this is just for visualization
-                                    }
-                                    break;
+
+                                        // We will try to reset the process here -- faking a retry
+                                        Optional<Boolean> isReset = mngr.resetProcess(correlationId);
+                                        isReset.ifPresent(aBoolean -> info.append(" (was ").append(aBoolean ? "" : "NOT ").append("reset)"));
+                                        break;
+                                }
+                                System.out.println(info);
                             }
                         }
-                        else {
-                            System.out.print(" (running transaction, status not yet visible) ");
-                        }
-                        System.out.println();
                     }
-
                     Thread.sleep(20 * 1000); // 20 seconds
                 } catch (InterruptedException | MuProcessException ignore) {}
             } while (!workQueue.isEmpty());
