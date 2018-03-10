@@ -1,11 +1,17 @@
 package demo;
 
 import org.gautelis.muprocessmanager.*;
+import org.gautelis.vopn.db.Database;
+import org.gautelis.vopn.db.utils.Derby;
+import org.gautelis.vopn.db.utils.PostgreSQL;
 import org.gautelis.vopn.queue.WorkQueue;
 import org.gautelis.vopn.queue.WorkerQueueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -16,11 +22,59 @@ public class Application
 
     private static final Object lock = new Object();
 
+    private enum DatabaseBackend {
+        internal,
+        derby,
+        db2,
+        postgresql
+    };
+
+    private static DatabaseBackend backend = DatabaseBackend.internal;
+
     public static void main( String... args )
     {
+        System.out.println("Backing database: " + backend.name());
         try {
-            final MuProcessManager mngr = MuProcessManager.getManager();
-            mngr.start();
+            MuProcessManager mngr;
+
+            try {
+                final DataSource dataSource;
+                switch (backend) {
+                    case postgresql:
+                        try (InputStream is = Application.class.getResourceAsStream(backend.name() + "-configuration.xml")) {
+                            Properties properties = new Properties();
+                            properties.loadFromXML(is);
+
+                            dataSource = PostgreSQL.getDataSource("demo", Database.getConfiguration(properties));
+                            mngr = MuProcessManager.getManager(dataSource);
+                        }
+                        break;
+
+                    case derby:
+                    case db2:
+                        try (InputStream is = Application.class.getResourceAsStream(backend.name() + "-configuration.xml")) {
+                            Properties properties = new Properties();
+                            properties.loadFromXML(is);
+
+                            dataSource = Derby.getDataSource("demo", Database.getConfiguration(properties));
+                            mngr = MuProcessManager.getManager(dataSource);
+                        }
+                        break;
+
+                    case internal:
+                    default:
+                        mngr = MuProcessManager.getManager();
+                        break;
+                }
+
+                mngr.start();
+
+            } catch (IOException ioe) {
+                String info = "No configuration for database: " + backend.name() + ": ";
+                info += ioe.getMessage();
+                throw new MuProcessException(info, ioe);
+            }
+
 
             WorkQueue workQueue = WorkerQueueFactory.getWorkQueue(
                     WorkerQueueFactory.Type.Multi,
@@ -113,12 +167,12 @@ public class Application
 
                             final StringBuffer info = new StringBuffer("correlationId=\"").append(correlationId).append("\"");
 
-                            Optional<MuProcessStatus> _status = mngr.getProcessStatus(correlationId);
-                            if (_status.isPresent()) {
-                                MuProcessStatus status = _status.get();
-                                info.append(" status=").append(status);
+                            Optional<MuProcessState> _state = mngr.getProcessState(correlationId);
+                            if (_state.isPresent()) {
+                                MuProcessState state = _state.get();
+                                info.append(" state=").append(state);
 
-                                switch (status) {
+                                switch (state) {
                                     case SUCCESSFUL:
                                         sit.remove();
 
@@ -170,6 +224,7 @@ public class Application
             String info = "Failure: ";
             info += t;
             System.out.println(info);
+            t.printStackTrace(System.err);
             log.warn(info, t);
         }
     }

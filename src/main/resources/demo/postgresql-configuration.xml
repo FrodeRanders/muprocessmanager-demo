@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="manager">postgresql</entry>
+    <entry key="driver">org.postgresql.Driver</entry>
+    <entry key="url">jdbc:postgresql://localhost:5433/muproc</entry>
+    <entry key="user">muproc</entry>
+    <entry key="password">muproc</entry>
+</properties>
