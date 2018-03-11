@@ -1,6 +1,8 @@
 package demo;
 
 import org.gautelis.muprocessmanager.*;
+import org.gautelis.muprocessmanager.payload.MuNativeActivityParameters;
+import org.gautelis.muprocessmanager.payload.MuNativeProcessResult;
 import org.gautelis.vopn.db.Database;
 import org.gautelis.vopn.db.utils.Derby;
 import org.gautelis.vopn.db.utils.PostgreSQL;
@@ -98,7 +100,7 @@ public class Application
                     try {
                         process = mngr.newProcess(correlationId);
 
-                        MuActivityParameters parameters = new MuActivityParameters();
+                        MuNativeActivityParameters parameters = new MuNativeActivityParameters();
                         parameters.put("arg1", "param1");
                         process.execute(
                                 (p, r) -> !(Math.random() < /* forward failure probability */ 0.01),
@@ -107,7 +109,14 @@ public class Application
 
                         parameters.put("arg2", 42);
                         process.execute(
-                                (p, r) -> r.add(10 * (int) p.get("arg2")),
+                                (p, r) -> {
+                                    if (p.isNative() && r.isNative()) {
+                                        MuNativeActivityParameters np = (MuNativeActivityParameters)p;
+                                        MuNativeProcessResult nr = (MuNativeProcessResult)r;
+                                        nr.add(10 * (int) np.get("arg2"));
+                                    }
+                                    return true;
+                                },
                                 new SecondActivityCompensation(),
                                 parameters
                         );
@@ -117,9 +126,6 @@ public class Application
 
                         parameters.put("arg4", 22 / 7.0);
                         process.execute(new FourthActivity(), parameters);
-
-                        MuProcessResult result = process.getResult();
-                        result.add("Adding to the process result");
 
                         process.finished();
 
@@ -157,7 +163,7 @@ public class Application
             }
 
             do {
-                System.out.println("\nProcess result samples: ");
+                System.out.println("\nProcess result samples: " + sampledCorrelationIds.size());
                 try {
                     synchronized (lock) {
                         // Iterate since we will modify collection
@@ -178,7 +184,11 @@ public class Application
 
                                         // Retrieve process result
                                         Optional<MuProcessResult> _result = mngr.getProcessResult(correlationId);
-                                        _result.ifPresent(objects -> objects.forEach((v) -> info.append(" {").append(v).append("}")));
+                                        _result.ifPresent(objects -> {
+                                            if (objects.isNative()) {
+                                                ((MuNativeProcessResult)objects).forEach(v -> info.append(" {").append(v).append("}"));
+                                            }
+                                        });
                                         break;
 
                                     case NEW:
