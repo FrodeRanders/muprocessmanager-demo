@@ -18,11 +18,8 @@
 package demo;
 
 import org.gautelis.muprocessmanager.MuActivity;
-import org.gautelis.muprocessmanager.MuActivityParameters;
-import org.gautelis.muprocessmanager.MuProcessResult;
-import org.gautelis.muprocessmanager.MuActivityState;
-
-import java.util.Optional;
+import org.gautelis.muprocessmanager.MuBackwardActivityContext;
+import org.gautelis.muprocessmanager.MuForwardActivityContext;
 
 public class FourthActivity implements MuActivity {
 
@@ -33,12 +30,12 @@ public class FourthActivity implements MuActivity {
     public FourthActivity() {}
 
     @Override
-    public boolean forward(MuActivityParameters args, MuProcessResult result) {
+    public boolean forward(MuForwardActivityContext context) {
         return !(Math.random() < forwardFailureProbability);
     }
 
     @Override
-    public boolean backward(MuActivityParameters args, Optional<MuActivityState> preState) {
+    public boolean backward(MuBackwardActivityContext context) {
         // A possibility for an exception
         if (Math.random() < backwardExceptionProbability) {
             throw new NullPointerException("just an example of a nasty failure"); // utter failure

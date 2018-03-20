@@ -17,11 +17,8 @@
  */
 package demo;
 
-import org.gautelis.muprocessmanager.MuActivityParameters;
+import org.gautelis.muprocessmanager.MuBackwardActivityContext;
 import org.gautelis.muprocessmanager.MuBackwardBehaviour;
-import org.gautelis.muprocessmanager.MuActivityState;
-
-import java.util.Optional;
 
 public class SecondActivityCompensation implements MuBackwardBehaviour {
 
@@ -31,7 +28,7 @@ public class SecondActivityCompensation implements MuBackwardBehaviour {
     public SecondActivityCompensation() {}
 
     @Override
-    public boolean backward(MuActivityParameters args, Optional<MuActivityState> preState) {
+    public boolean backward(MuBackwardActivityContext context) {
         // A possibility for an exception
         if (Math.random() < backwardExceptionProbability) {
             throw new NullPointerException("just an example of a nasty failure"); // utter failure

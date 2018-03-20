@@ -103,16 +103,16 @@ public class Application
                         MuNativeActivityParameters parameters = new MuNativeActivityParameters();
                         parameters.put("arg1", "param1");
                         process.execute(
-                                (p, r) -> !(Math.random() < /* forward failure probability */ 0.01),
+                                c -> !(Math.random() < /* forward failure probability */ 0.01),
                                 parameters
                         );
 
                         parameters.put("arg2", 42);
                         process.execute(
-                                (p, r) -> {
-                                    if (p.isNative() && r.isNative()) {
-                                        MuNativeActivityParameters np = (MuNativeActivityParameters)p;
-                                        MuNativeProcessResult nr = (MuNativeProcessResult)r;
+                                c -> {
+                                    if (c.usesNativeDataFlow()) {
+                                        MuNativeActivityParameters np = (MuNativeActivityParameters)c.getActivityParameters();
+                                        MuNativeProcessResult nr = (MuNativeProcessResult)c.getResult();
                                         nr.add(10 * (int) np.get("arg2"));
                                     }
                                     return true;
