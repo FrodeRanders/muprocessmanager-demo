@@ -5,6 +5,7 @@ import org.gautelis.muprocessmanager.payload.MuNativeActivityParameters;
 import org.gautelis.muprocessmanager.payload.MuNativeProcessResult;
 import org.gautelis.vopn.db.Database;
 import org.gautelis.vopn.db.utils.Derby;
+import org.gautelis.vopn.db.utils.MySQL;
 import org.gautelis.vopn.db.utils.PostgreSQL;
 import org.gautelis.vopn.queue.WorkQueue;
 import org.gautelis.vopn.queue.WorkerQueueFactory;
@@ -28,7 +29,8 @@ public class Application
         internal,
         derby,
         db2,
-        postgresql
+        postgresql,
+        mysql
     };
 
     private static DatabaseBackend backend = DatabaseBackend.internal;
@@ -48,6 +50,16 @@ public class Application
                             properties.loadFromXML(is);
 
                             dataSource = PostgreSQL.getDataSource("demo", Database.getConfiguration(properties));
+                            mngr = MuProcessManager.getManager(dataSource);
+                        }
+                        break;
+
+                    case mysql:
+                        try (InputStream is = Application.class.getResourceAsStream(backend.name() + "-configuration.xml")) {
+                            Properties properties = new Properties();
+                            properties.loadFromXML(is);
+
+                            dataSource = MySQL.getDataSource("demo", Database.getConfiguration(properties));
                             mngr = MuProcessManager.getManager(dataSource);
                         }
                         break;
@@ -186,7 +198,7 @@ public class Application
                                         Optional<MuProcessResult> _result = mngr.getProcessResult(correlationId);
                                         _result.ifPresent(objects -> {
                                             if (objects.isNative()) {
-                                                ((MuNativeProcessResult)objects).forEach(v -> info.append(" {").append(v).append("}"));
+                                                ((MuNativeProcessResult)objects).forEach(v -> info.append(" result=").append(v));
                                             }
                                         });
                                         break;

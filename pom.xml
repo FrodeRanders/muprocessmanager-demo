@@ -29,7 +29,7 @@
         <dependency>
             <groupId>org.gautelis</groupId>
             <artifactId>muprocessmanager</artifactId>
-            <version>1.6-SNAPSHOT</version>
+            <version>1.7-SNAPSHOT</version>
         </dependency>
 
         <!-- Logging (using log4j2) -->
@@ -56,6 +56,12 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>6.0.6</version>
         </dependency>
     </dependencies>
 
