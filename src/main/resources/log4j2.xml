@@ -34,7 +34,7 @@
 
     <Loggers>
         <logger name="org.gautelis.vopn.lang" level="INFO" />
-        <logger name="org.gautelis.muprocessmanager.MuPersistentLog" level="DEBUG" />
+        <logger name="org.gautelis.muprocessmanager" level="DEBUG" />
         <logger name="org.apache" level="WARN" />
 
         <logger name="STATISTICS" level="INFO">
