@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+import static java.lang.Runtime.getRuntime;
+
 /**
  */
 public class Application
@@ -33,7 +35,7 @@ public class Application
         mysql
     };
 
-    private static DatabaseBackend backend = DatabaseBackend.internal;
+    private static DatabaseBackend backend = DatabaseBackend.postgresql;
 
     public static void main( String... args )
     {
@@ -81,6 +83,7 @@ public class Application
                         break;
                 }
 
+                getRuntime().addShutdownHook(new Thread(mngr::stop));
                 mngr.start();
 
             } catch (IOException ioe) {

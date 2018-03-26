@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-    <entry key="manager">mysql</entry>
     <entry key="driver">com.mysql.cj.jdbc.Driver</entry>
     <entry key="url">jdbc:mysql://192.168.1.202/muproc?useSSL=false&amp;serverTimezone=UTC</entry>
     <entry key="user">muproc</entry>
