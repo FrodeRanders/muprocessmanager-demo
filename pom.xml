@@ -29,7 +29,7 @@
         <dependency>
             <groupId>org.gautelis</groupId>
             <artifactId>muprocessmanager</artifactId>
-            <version>1.8-SNAPSHOT</version>
+            <version>1.8</version>
         </dependency>
 
         <!-- Logging (using log4j2) -->

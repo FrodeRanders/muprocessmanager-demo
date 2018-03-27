@@ -30,12 +30,11 @@ public class Application
     private enum DatabaseBackend {
         internal,
         derby,
-        db2,
         postgresql,
         mysql
     };
 
-    private static DatabaseBackend backend = DatabaseBackend.postgresql;
+    private static DatabaseBackend backend = DatabaseBackend.internal;
 
     public static void main( String... args )
     {
@@ -67,7 +66,6 @@ public class Application
                         break;
 
                     case derby:
-                    case db2:
                         try (InputStream is = Application.class.getResourceAsStream(backend.name() + "-configuration.xml")) {
                             Properties properties = new Properties();
                             properties.loadFromXML(is);
