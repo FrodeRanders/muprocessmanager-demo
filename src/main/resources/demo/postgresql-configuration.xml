@@ -2,7 +2,7 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <entry key="driver">org.postgresql.Driver</entry>
-    <entry key="url">jdbc:postgresql://localhost:5433/muproc</entry>
+    <entry key="url">jdbc:postgresql://localhost:5432/muproc</entry>
     <entry key="user">muproc</entry>
     <entry key="password">muproc</entry>
 </properties>
