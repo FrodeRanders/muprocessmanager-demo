@@ -32,9 +32,9 @@ public class Application
         derby,
         postgresql,
         mysql
-    };
+    }
 
-    private static DatabaseBackend backend = DatabaseBackend.internal;
+    private static DatabaseBackend backend = DatabaseBackend.derby;
 
     public static void main( String... args )
     {
