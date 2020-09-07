@@ -22,7 +22,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.7.25</slf4j.version>
-        <log4j.version>2.11.1</log4j.version>
+        <log4j.version>2.13.3</log4j.version>
     </properties>
 
     <prerequisites>
@@ -59,13 +59,13 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.5.jre7</version>
+            <version>42.2.16.jre7</version>
         </dependency>
 
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.12</version>
+            <version>8.0.21</version>
         </dependency>
     </dependencies>
 
